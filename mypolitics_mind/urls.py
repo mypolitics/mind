@@ -13,9 +13,18 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf import settings
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+import debug_toolbar
+
+from mypolitics_mind.apps.router import router
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/', include(router.urls)),
+    path('api-auth/', include('rest_framework.urls'))
 ]
+
+if settings.DEBUG:
+    urlpatterns += path('__debug__/', include(debug_toolbar.urls)),

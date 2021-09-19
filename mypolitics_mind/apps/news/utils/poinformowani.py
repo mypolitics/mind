@@ -2,32 +2,34 @@ import math
 import requests as requests
 from bs4 import BeautifulSoup
 
+
 class PoinformowaniUtil:
     base_page = 'https://wiadomosci.poinformowani.pl/'
 
-    def getAndParsePage(self, url):
+    @staticmethod
+    def get_and_parse_page(self, url):
         response = requests.get(url)
         response.encoding = 'UTF-8'
         return BeautifulSoup(response.text, 'html.parser')
 
-    def getPageUrls(self, index):
+    def get_page_urls(self, index):
         url = f'{self.base_page}?page={index}'
-        page = self.getAndParsePage(url)
+        page = self.get_and_parse_page(url)
         links = page.select('article > a', href=True)
         return list(map(lambda link: link['href'], links))
 
-    def getUrls(self, start, end):
+    def get_urls(self, start, end):
         urls = []
         per_page = 48
         pages = math.ceil(end / per_page)
         for page in range(0, pages):
-            page_urls = self.getPageUrls(page+1)
+            page_urls = self.get_page_urls(page + 1)
             urls.extend(page_urls)
 
         return urls[start:end]
 
-    def getSingleArticle(self, url):
-        page = self.getAndParsePage(url)
+    def get_single_article(self, url):
+        page = self.get_and_parse_page(url)
         title = page.select_one('article h1').text
         image_src = page.select_one('article img', src=True)['src']
         author_name = page.select_one('article #ArticleInfo > li:first-child > b').text
@@ -49,12 +51,11 @@ class PoinformowaniUtil:
             },
         }
 
-
-    def getManyArticles(self, start, end):
+    def get_many_articles(self, start, end):
         articles = []
-        urls = self.getUrls(start, end)
+        urls = self.get_urls(start, end)
 
         for url in urls:
-            articles.append(self.getSingleArticle(url))
+            articles.append(self.get_single_article(url))
 
         return articles

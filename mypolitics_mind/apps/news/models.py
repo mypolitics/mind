@@ -12,10 +12,11 @@ class News(models.Model):
     slug = models.SlugField()
     date = models.DateTimeField()
     image = models.JSONField()
-    author = models.CharField(max_length=255)
+    author = models.CharField(max_length=255, null=True)
 
     def __str__(self):
         return self.title
 
     class Meta:
         ordering = ['-date']
+        verbose_name_plural = 'News'

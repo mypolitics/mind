@@ -40,6 +40,9 @@ class PoinformowaniUtil:
         content = str(page.select_one('article .ModuleText'))
         slug = url.split('/').pop()
 
+        if date == author_name:
+            author_name = None
+
         return {
             'title': title,
             'slug': slug,
@@ -58,7 +61,6 @@ class PoinformowaniUtil:
 
         for url in urls:
             article = self.get_single_article(url)
-
             articles.append(article)
 
         return articles
@@ -74,6 +76,6 @@ class PoinformowaniUtil:
             if article['slug'] == slug:
                 break
 
-            articles.append(self.get_single_article(url))
+            articles.append(article)
 
         return articles

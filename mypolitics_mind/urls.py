@@ -17,10 +17,12 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
 import debug_toolbar
+from django.views.generic import RedirectView
 
 from mypolitics_mind.apps.router import router
 
 urlpatterns = [
+    path('', RedirectView.as_view(url='api')),
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls')),

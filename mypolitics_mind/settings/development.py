@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     # packages
     'rest_framework',
     # apps
-    'mypolitics_mind.apps.news'
+    'mypolitics_mind.apps.news',
+    'mypolitics_mind.apps.sejm_members'
 ]
 
 REST_FRAMEWORK = {

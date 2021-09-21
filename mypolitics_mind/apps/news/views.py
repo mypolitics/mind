@@ -2,7 +2,7 @@ from rest_framework import viewsets
 from django.utils import timezone
 from mypolitics_mind.apps.news.models import News
 from mypolitics_mind.apps.news.serializers import NewsSerializer
-from mypolitics_mind.apps.news.utils.poinformowani import PoinformowaniUtil
+from mypolitics_mind.apps.news.scrapers.poinformowani import PoinformowaniScraper
 
 
 class NewsPoinformowaniViewSet(viewsets.ReadOnlyModelViewSet):
@@ -10,8 +10,9 @@ class NewsPoinformowaniViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = NewsSerializer
 
     def list(self, request, *args, **kwargs):
+
         current_tz = timezone.get_current_timezone()
-        poinformowani = PoinformowaniUtil()
+        poinformowani = PoinformowaniScraper()
 
         newest = self.queryset.first()
 

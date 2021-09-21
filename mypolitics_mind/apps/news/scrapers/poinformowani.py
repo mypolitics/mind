@@ -2,6 +2,12 @@ import math
 import requests as requests
 from bs4 import BeautifulSoup
 from datetime import datetime
+import os
+import aiohttp
+import asyncio
+
+if os.name == 'nt':
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
 def get_and_parse_page(url):
@@ -10,7 +16,24 @@ def get_and_parse_page(url):
     return BeautifulSoup(response.text, 'html.parser')
 
 
-class PoinformowaniUtil:
+async def get_page(session, url):
+    async with session.get(url) as r:
+        return await r.text()
+
+
+async def get_pages(session, urls, slug=None):
+    tasks = []
+
+    for url in urls:
+        if slug and url.split('/')[-1] == slug:
+            break
+        task = asyncio.create_task(get_page(session, url))
+        tasks.append(task)
+    results = await asyncio.gather(*tasks)
+    return results
+
+
+class PoinformowaniScraper:
     base_page = 'https://wiadomosci.poinformowani.pl/'
     per_page = 48
 
@@ -30,8 +53,9 @@ class PoinformowaniUtil:
 
         return urls[start:end]
 
-    def get_single_article(self, url):
-        page = get_and_parse_page(url)
+    def get_single_article(self, page, url):
+        page = BeautifulSoup(page, 'html.parser')
+
         title = page.select_one('article h1').text
         image_src = page.select_one('article img', src=True)['src']
         author_name = page.select_one(
@@ -55,27 +79,37 @@ class PoinformowaniUtil:
             'author': author_name,
         }
 
-    def get_many_articles(self, start, end):
-        articles = []
+    async def parse_many_articles(self, start, end):
         urls = self.get_urls(start, end)
 
-        for url in urls:
-            article = self.get_single_article(url)
+        async with aiohttp.ClientSession() as session:
+            pages = await get_pages(session, urls)
+
+        articles = []
+
+        for page, url in zip(pages, urls):
+            article = self.get_single_article(page, url)
+            articles.append(article)
+
+        return articles
+
+    async def parse_new_articles(self, slug, start, end):
+
+        urls = self.get_urls(start, end)
+
+        async with aiohttp.ClientSession() as session:
+            pages = await get_pages(session, urls, slug)
+
+        articles = []
+
+        for page, url in zip(pages, urls):
+            article = self.get_single_article(page, url)
             articles.append(article)
 
         return articles
 
     def get_new_articles(self, slug, start=0, end=per_page):
+        return asyncio.run(self.parse_new_articles(slug, start, end))
 
-        articles = []
-        urls = self.get_urls(start, end)
-
-        for url in urls:
-            article = self.get_single_article(url)
-
-            if article['slug'] == slug:
-                break
-
-            articles.append(article)
-
-        return articles
+    def get_many_articles(self, start, end):
+        return asyncio.run(self.parse_many_articles(start, end))

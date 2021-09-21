@@ -8,9 +8,16 @@ import asyncio
 if os.name == 'nt':
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-URL = 'https://www.sejm.gov.pl/Sejm9.nsf/poslowie.xsp?type=A'
-URL = requests.get(URL)
-PAGE = BeautifulSoup(URL.content, 'html.parser')
+MEMBERS_PAGE_URL = 'https://www.sejm.gov.pl/Sejm9.nsf/poslowie.xsp?type=A'
+MEMBERS_PAGE = requests.get(MEMBERS_PAGE_URL)
+
+
+def get_members_urls(page):
+    page = BeautifulSoup(page.content, 'html.parser')
+    members_link = page.select('ul.deputies > li > div > a', href=True)
+    urls = list(
+        map(lambda x: 'https://www.sejm.gov.pl/' + x['href'], members_link))
+    return urls
 
 
 async def get_page(session, url):
@@ -43,6 +50,7 @@ def parse_page(html):
     experience = page.select_one(
         'div.partia > ul > li:nth-child(6) > p.right').text
     party = page.select_one('div.partia > ul > li:nth-child(7) > p.right').text
+
     dateOfBirth = page.select_one(
         'div.cv > ul > li:nth-child(1) > p.right').text
     try:
@@ -52,23 +60,26 @@ def parse_page(html):
         education = None
     try:
         school = page.select_one(
-            'div.cv > ul > li:nth-child(3) > p.right').text
+            'div.cv > ul > li:nth-last-child(2) > p.right').text
     except AttributeError:
         school = None
     try:
-        job = page.select_one('div.cv > ul > li:nth-child(4) > p.right').text
+        job = page.select_one('div.cv > ul > li:nth-last-child(1) > p.right').text
     except AttributeError:
         job = None
     photoUrl = page.select_one(
         '#view\\:_id1\\:_id2\\:facetMain\\:_id109\\:_id111')['src']
 
+    electionDate = datetime.strptime(electionDate, '%d-%m-%Y').date()
+    pledge = datetime.strptime(pledge, '%d-%m-%Y').date()
+
     return {
         'name': name,
-        'electionDate': datetime.strptime(electionDate, '%d-%m-%Y').date(),
+        'electionDate': electionDate,
         'list': list,
         'region': region,
         'votes': votes,
-        'pledge': datetime.strptime(pledge, '%d-%m-%Y').date(),
+        'pledge': pledge,
         'experience': experience,
         'party': party,
         'dateOfBirth': dateOfBirth,
@@ -91,11 +102,20 @@ async def get_members(urls):
     return members
 
 
-def get_all_members():
-    members_link = PAGE.select('ul.deputies > li > div > a', href=True)
-    urls = list(
-        map(lambda x: 'https://www.sejm.gov.pl/' + x['href'], members_link))
+def get_all_members_async():
+    urls = get_members_urls(MEMBERS_PAGE)
 
     results = asyncio.run(get_members(urls))
 
     return results
+
+
+def get_all_members():
+    urls = get_members_urls(MEMBERS_PAGE)
+
+    result = []
+    for url in urls:
+        page = requests.get(url).content
+        result.append(parse_page(page))
+
+    return result

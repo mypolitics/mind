@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
     # packages
     'rest_framework',
+    'django_filters',
     # apps
     'mypolitics_mind.apps.news',
     'mypolitics_mind.apps.sejm_members'

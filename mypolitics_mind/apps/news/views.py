@@ -1,3 +1,5 @@
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from django.utils import timezone
 from mypolitics_mind.apps.news.models import News
@@ -8,6 +10,12 @@ from mypolitics_mind.apps.news.scrapers.poinformowani import PoinformowaniScrape
 class NewsPoinformowaniViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = News.objects.all()
     serializer_class = NewsSerializer
+
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+
+    ordering_fields = ['date']
+    filterset_fields = ['author']
+    search_fields = ['title']
 
     def list(self, request, *args, **kwargs):
 

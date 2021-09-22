@@ -22,7 +22,7 @@ from django.views.generic import RedirectView
 from mypolitics_mind.apps.router import router
 
 urlpatterns = [
-    path('', RedirectView.as_view(url='api')),
+    path('', RedirectView.as_view(url='admin')),
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls')),

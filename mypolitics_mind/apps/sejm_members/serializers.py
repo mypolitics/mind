@@ -1,8 +1,9 @@
 from mypolitics_mind.apps.sejm_members.models import Members
-from rest_framework import serializers
+
+from mypolitics_mind.common.serializers import DynamicFieldsModelSerializer
 
 
-class MemberSerializer(serializers.ModelSerializer):
+class MemberSerializer(DynamicFieldsModelSerializer):
     class Meta:
         model = Members
         fields = '__all__'

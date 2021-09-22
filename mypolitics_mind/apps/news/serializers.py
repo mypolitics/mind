@@ -1,8 +1,8 @@
 from mypolitics_mind.apps.news.models import News
-from rest_framework import serializers
+from mypolitics_mind.common.serializers import DynamicFieldsModelSerializer
 
 
-class NewsSerializer(serializers.ModelSerializer):
+class NewsSerializer(DynamicFieldsModelSerializer):
     class Meta:
         model = News
         fields = '__all__'

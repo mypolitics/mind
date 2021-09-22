@@ -1,10 +1,11 @@
+import asyncio
 import math
+import os
+from datetime import datetime
+
+import aiohttp
 import requests as requests
 from bs4 import BeautifulSoup
-from datetime import datetime
-import os
-import aiohttp
-import asyncio
 
 if os.name == 'nt':
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())

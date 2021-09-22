@@ -1,10 +1,11 @@
-from rest_framework import filters
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets
 from django.utils import timezone
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
+from rest_framework import viewsets
+
 from mypolitics_mind.apps.news.models import News
-from mypolitics_mind.apps.news.serializers import NewsSerializer
 from mypolitics_mind.apps.news.scrapers.poinformowani import PoinformowaniScraper
+from mypolitics_mind.apps.news.serializers import NewsSerializer
 
 
 class NewsPoinformowaniViewSet(viewsets.ReadOnlyModelViewSet):

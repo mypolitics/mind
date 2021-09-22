@@ -1,13 +1,14 @@
-from rest_framework import filters
+from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
+
+import mypolitics_mind.apps.sejm_members.scrapers.sejm_scraper as sejm_scraper
 from mypolitics_mind.apps.sejm_members.models import Members
 from mypolitics_mind.apps.sejm_members.serializers import MemberSerializer
-import mypolitics_mind.apps.sejm_members.scrapers.sejm_scraper as sejm_scraper
-from django.db import transaction
-from rest_framework.permissions import IsAdminUser
 
 
 class MembersViewSet(viewsets.ReadOnlyModelViewSet):

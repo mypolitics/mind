@@ -1,9 +1,10 @@
-from datetime import datetime
-from bs4 import BeautifulSoup
-import requests
-import os
-import aiohttp
 import asyncio
+import os
+from datetime import datetime
+
+import aiohttp
+import requests
+from bs4 import BeautifulSoup
 
 if os.name == 'nt':
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -53,20 +54,23 @@ def parse_page(html):
 
     dateOfBirth = page.select_one(
         'div.cv > ul > li:nth-child(1) > p.right').text
-    try:
-        education = page.select_one(
-            'div.cv > ul > li:nth-child(2) > p.right').text
-    except AttributeError:
+
+    education = page.select_one('div.cv > ul > li:nth-child(2)')
+
+    if education.select_one('p.left').text == 'Wykształcenie:':
+        education = education.select_one('p.right').text
+    else:
         education = None
-    try:
-        school = page.select_one(
-            'div.cv > ul > li:nth-last-child(2) > p.right').text
-    except AttributeError:
+
+    school = page.select_one('div.cv > ul > li:nth-last-child(2)')
+
+    if school.select_one('p.left').text == 'Ukończona szkoła:':
+        school = school.select_one('p.right').text
+    else:
         school = None
-    try:
-        job = page.select_one('div.cv > ul > li:nth-last-child(1) > p.right').text
-    except AttributeError:
-        job = None
+
+    job = page.select_one('div.cv > ul > li:nth-last-child(1) > p.right').text
+
     photoUrl = page.select_one(
         '#view\\:_id1\\:_id2\\:facetMain\\:_id109\\:_id111')['src']
 

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     # packages
     'rest_framework',
     'django_filters',
+    'rest_framework_simplejwt',
     # apps
     'mypolitics_mind.apps.news',
     'mypolitics_mind.apps.sejm_members'
@@ -53,8 +54,8 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated'
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ]
 }
 

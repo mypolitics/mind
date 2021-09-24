@@ -19,16 +19,12 @@ class NewsPoinformowaniViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ['title']
 
     def list(self, request, *args, **kwargs):
-
         current_tz = timezone.get_current_timezone()
         poinformowani = PoinformowaniScraper()
 
         newest = self.queryset.first()
 
-        if newest:
-            articles = poinformowani.get_new_articles(newest.slug)
-        else:
-            articles = poinformowani.get_many_articles(0, 20)
+        articles = poinformowani.get_many_articles(slug=newest.slug if newest else None)
 
         new_articles = []
 

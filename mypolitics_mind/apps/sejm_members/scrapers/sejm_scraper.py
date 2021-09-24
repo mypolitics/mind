@@ -1,13 +1,6 @@
-import asyncio
-import os
 from datetime import datetime
-
-import aiohttp
 import requests
 from bs4 import BeautifulSoup
-
-if os.name == 'nt':
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 MEMBERS_PAGE_URL = 'https://www.sejm.gov.pl/Sejm9.nsf/poslowie.xsp?type=A'
 MEMBERS_PAGE = requests.get(MEMBERS_PAGE_URL)
@@ -19,21 +12,6 @@ def get_members_urls(page):
     urls = list(
         map(lambda x: 'https://www.sejm.gov.pl/' + x['href'], members_link))
     return urls
-
-
-async def get_page(session, url):
-    async with session.get(url) as r:
-        return await r.text()
-
-
-async def get_all_pages(session, urls):
-    tasks = []
-
-    for url in urls:
-        task = asyncio.create_task(get_page(session, url))
-        tasks.append(task)
-    results = await asyncio.gather(*tasks)
-    return results
 
 
 def parse_page(html):
@@ -92,26 +70,6 @@ def parse_page(html):
         'job': job,
         'photoUrl': photoUrl
     }
-
-
-async def get_members(urls):
-    members = []
-    async with aiohttp.ClientSession() as session:
-        pages = await get_all_pages(session, urls)
-
-    for page in pages:
-        member = parse_page(page)
-        members.append(member)
-
-    return members
-
-
-def get_all_members_async():
-    urls = get_members_urls(MEMBERS_PAGE)
-
-    results = asyncio.run(get_members(urls))
-
-    return results
 
 
 def get_all_members():

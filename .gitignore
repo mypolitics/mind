@@ -4,3 +4,4 @@ venv/*
 db.sqlite3
 /mypolitics_mind/apps/news/migrations/
 /mypolitics_mind/apps/sejm_members/migrations/
+/mypolitics_mind/apps/sejm_votings/migrations/

@@ -25,28 +25,9 @@ class MembersViewSet(viewsets.ReadOnlyModelViewSet):
     def update_data(self, request):
         members = sejm_scraper.get_all_members()
 
-        new_members = []
-
         with transaction.atomic():
-            for member in members:
-                member = Members(
-                    name=member['name'],
-                    electionDate=member['electionDate'],
-                    list=member['list'],
-                    region=member['region'],
-                    votes=member['votes'],
-                    pledge=member['pledge'],
-                    experience=member['experience'],
-                    party=member['party'],
-                    dateOfBirth=member['dateOfBirth'],
-                    education=member['education'],
-                    school=member['school'],
-                    job=member['job'],
-                    photoUrl=member['photoUrl'],
-                )
-                new_members.append(member)
+            new_members = (Members(**member) for member in members)
 
             self.queryset.delete()
             self.queryset.bulk_create(new_members)
-
-        return Response({'status': 'updated', 'members_count': len(new_members)})
+        return Response({'status': 'updated'})

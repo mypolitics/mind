@@ -29,14 +29,8 @@ class NewsPoinformowaniViewSet(viewsets.ReadOnlyModelViewSet):
         new_articles = []
 
         for article in articles:
-            article = News(
-                title=article['title'],
-                content=article['content'],
-                date=current_tz.localize(article['date']),
-                image=article['image'],
-                slug=article['slug'],
-                author=article['author']
-            )
+            article['date'] = current_tz.localize(article['date'])
+            article = News(**article)
 
             new_articles.append(article)
 

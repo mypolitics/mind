@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     # apps
     'mypolitics_mind.apps.news',
-    'mypolitics_mind.apps.sejm_members'
+    'mypolitics_mind.apps.sejm_members',
+    'mypolitics_mind.apps.sejm_votings'
 ]
 
 REST_FRAMEWORK = {

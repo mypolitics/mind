@@ -1,9 +1,9 @@
 import json
-from datetime import datetime
 
 import requests
 from bs4 import BeautifulSoup
 import concurrent.futures as futures
+from datetime import datetime
 
 BASE_URL = 'https://www.sejm.gov.pl/sejm9.nsf/agent.xsp?symbol=posglos&NrKadencji=9'
 
@@ -18,24 +18,30 @@ def get_page(url):
     return None if notFound is not None else page
 
 
-def get_new_setting_and_voting_count():
-    response = requests.get(BASE_URL)
-    response.encoding = 'UTF-8'
+def get_nr_kadnencji():
+    return BASE_URL.split('=')[-1]
+
+
+def get_all_sitting_and_voting_count():
     page = get_page(BASE_URL)
 
-    table = page.select('tbody > tr')
+    table_rows = page.select('tbody > tr')
 
-    sittingIndex = table[0].select_one('td').text
+    sitting_and_voting = {}
+    sitting = None
+    count = 0
+    for row in table_rows:
+        columns = row.select('td')
 
-    index = 1
-    for row in table[1:]:
-        if row.select_one('td').text.strip():
-            break
-        index += 1
+        if nrSitting := columns[0].text.strip():
+            if sitting:
+                sitting_and_voting[sitting] = count
+                count = 0
+            sitting = nrSitting
+        count += int(columns[-1].text.strip())
+    sitting_and_voting[sitting] = count
 
-    votingCount = sum((int(row.select('td')[-1].text) for row in table[:index]))
-
-    return int(sittingIndex), votingCount
+    return sitting_and_voting
 
 
 class SejmVoting:
@@ -59,10 +65,12 @@ class SejmVoting:
 
         rows = page.find_all('tr')[1:]
         topic, form = page.select("p.subbig")
+        date = page.select('#title_content > h1 > small')[0].text[5:15]
+
         data = {
             'topic': topic.text,
             'form': form.text,
-            'date': page.select('#title_content > h1 > small')[0].text[5:15],
+            'date': date,
             'sitting': self.sittingIndex,
             'voting': url.split('=')[-1],
             'results': {},
@@ -90,30 +98,35 @@ class SejmVoting:
         for i in range(lastVoting, self.votingCount + 1):
             urls.append(self.getQueryUrl(self.sittingIndex, i))
 
-        with futures.ThreadPoolExecutor() as execut:
-            data = execut.map(self.getVoting, urls)
+        sitting_data = [self.getVoting(url) for url in urls]
 
-        return list(data)
+        return sitting_data
 
 
-def get_new_sitting_data(dbSitting=None, dbVoting=None):
-    newSitting, newVotingCount = get_new_setting_and_voting_count()
-    sejmVouting = SejmVoting(newSitting, newVotingCount)
+def get_sittings_data(dbSitting=None, dbVoting=None):
+    sitting_and_voting = get_all_sitting_and_voting_count()
+    if dbSitting:
+        sitting_and_voting = {k: v for k, v in sitting_and_voting.items() if int(k) >= dbSitting}
 
-    if newSitting == dbSitting:
-        if newVotingCount == dbVoting:
-            return None
+    print(sitting_and_voting)
+    all_votings = sum(sitting_and_voting.values()) - (dbVoting or 0)
 
-        dbVoting = dbVoting + 1 if dbVoting else 1
-        return sejmVouting.get_data(dbVoting)
+    data = []
+    for key, value in sitting_and_voting.items():
+        sejmVouting = SejmVoting(key, value)
+        if int(key) == dbSitting:
+            data.extend(sejmVouting.get_data(dbVoting + 1))
+        else:
+            data.extend(sejmVouting.get_data())
+        if all_votings:
+            print(f'pobrane: {len(data)} progress {round(len(data) / all_votings * 100, 1)}%', )
 
-    return sejmVouting.get_data()
+    return data
 
 
 if __name__ == '__main__':
     start = datetime.now()
-    data = get_new_sitting_data()
+    data = get_sittings_data()
     print(f'Finish in {datetime.now() - start}')
-
     with open('data.json', 'w', encoding='utf-8') as file:
-        json.dump(data, file, indent=4, ensure_ascii=False)
+        json.dump({'data': data}, file, indent=2, ensure_ascii=False)

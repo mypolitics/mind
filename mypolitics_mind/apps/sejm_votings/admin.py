@@ -8,4 +8,4 @@ from mypolitics_mind.apps.sejm_votings.models import Voting
 class VotingAdmin(admin.ModelAdmin):
     list_display = ['id', 'topic', 'form', 'sitting', 'voting', 'date']
     search_fields = ['topic', 'form']
-    list_filter = ['sitting', 'date']
+    list_filter = ['date', 'sitting']

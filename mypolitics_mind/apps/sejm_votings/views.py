@@ -30,21 +30,32 @@ class VotingViewSet(viewsets.ReadOnlyModelViewSet):
     def list(self, request, *args, **kwargs):
         newest = Voting.objects.first()
         if newest:
-            votings = votings_scraper.get_new_sitting_data(newest.sitting, newest.voting)
+            votings = votings_scraper.get_sittings_data(newest.sitting, newest.voting)
         else:
-            votings = votings_scraper.get_new_sitting_data()
+            votings = votings_scraper.get_sittings_data()
 
         if votings:
             voting_to_save = []
-            for voting in votings:
-                id_slug = f'{voting["sitting"]}{voting["voting"]}{voting["date"].split("-")[0]}'
-                id_byte = bytes(id_slug, encoding='utf8')
-                id = base64.urlsafe_b64encode(id_byte).decode()
 
-                voting['id'] = id
-                voting["date"] = datetime.strptime(voting["date"], '%d-%m-%Y').date()
+            for voting in votings:
+                if not voting:
+                    continue
+
+                voting['id'] = gen_id(voting)
+
+                if voting["date"]:
+                    try:
+                        voting["date"] = datetime.strptime(voting["date"], '%d-%m-%Y').date()
+                    except ValueError:
+                        voting["date"] = None
                 voting_to_save.append(Voting(**voting))
 
             Voting.objects.bulk_create(voting_to_save)
 
         return super(VotingViewSet, self).list(request, *args, **kwargs)
+
+
+def gen_id(voting: dict):
+    id_str = f'{votings_scraper.get_nr_kadnencji()}/{voting["sitting"]}/{voting["voting"]}'
+    id_byte = bytes(id_str, encoding='utf8')
+    return base64.urlsafe_b64encode(id_byte).decode()

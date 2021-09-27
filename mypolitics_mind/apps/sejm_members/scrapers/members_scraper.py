@@ -1,9 +1,15 @@
+import json
 from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
+import concurrent.futures as futures
 
 MEMBERS_PAGE_URL = 'https://www.sejm.gov.pl/Sejm9.nsf/poslowie.xsp?type=A'
 MEMBERS_PAGE = requests.get(MEMBERS_PAGE_URL)
+
+
+def get_page(url):
+    return requests.get(url).content
 
 
 def get_members_urls(page):
@@ -14,7 +20,8 @@ def get_members_urls(page):
     return urls
 
 
-def parse_page(html):
+def parse_page(url):
+    html = get_page(url)
     page = BeautifulSoup(html, 'html.parser')
 
     name = page.select_one('#title_content > h1').text
@@ -52,9 +59,6 @@ def parse_page(html):
     photoUrl = page.select_one(
         '#view\\:_id1\\:_id2\\:facetMain\\:_id109\\:_id111')['src']
 
-    electionDate = datetime.strptime(electionDate, '%d-%m-%Y').date()
-    pledge = datetime.strptime(pledge, '%d-%m-%Y').date()
-
     return {
         'name': name,
         'electionDate': electionDate,
@@ -75,9 +79,16 @@ def parse_page(html):
 def get_all_members():
     urls = get_members_urls(MEMBERS_PAGE)
 
-    result = []
-    for url in urls:
-        page = requests.get(url).content
-        result.append(parse_page(page))
+    with futures.ThreadPoolExecutor() as executor:
+        result = executor.map(parse_page, urls)
 
-    return result
+    return list(result)
+
+
+if __name__ == '__main__':
+    start = datetime.now()
+    data = get_all_members()
+    with open('members.json', 'w', encoding='utf-8') as file:
+        json.dump({'members': data}, file, indent=2, ensure_ascii=False)
+
+    print(f'Finish in {datetime.now() - start}')

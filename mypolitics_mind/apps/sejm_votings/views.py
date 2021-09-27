@@ -15,12 +15,20 @@ class VotingViewSet(viewsets.ReadOnlyModelViewSet):
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
 
-    ordering_fields = ['sitting', 'voting', 'date']
-    filterset_fields = ['id', 'sitting']
+    filterset_fields = ['sitting']
     search_fields = ['topic', 'form']
+    ordering_fields = ['sitting', 'voting', 'date']
+
+    def get_queryset(self):
+        queryset = Voting.objects.all()
+        ids = self.request.query_params.get('ids')
+        if ids is not None:
+            ids = ids.split(',')
+            return queryset.filter(id__in=ids)
+        return queryset
 
     def list(self, request, *args, **kwargs):
-        newest = self.queryset.first()
+        newest = Voting.objects.first()
         if newest:
             votings = votings_scraper.get_new_sitting_data(newest.sitting, newest.voting)
         else:
@@ -29,7 +37,7 @@ class VotingViewSet(viewsets.ReadOnlyModelViewSet):
         if votings:
             voting_to_save = []
             for voting in votings:
-                id_slug = f'{voting["sitting"]}{voting["voting"]}{voting["date"]}'
+                id_slug = f'{voting["sitting"]}{voting["voting"]}{voting["date"].split("-")[0]}'
                 id_byte = bytes(id_slug, encoding='utf8')
                 id = base64.urlsafe_b64encode(id_byte).decode()
 

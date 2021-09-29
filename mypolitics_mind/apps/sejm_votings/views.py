@@ -3,10 +3,19 @@ from datetime import datetime
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from rest_framework import viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
+import mypolitics_mind.apps.sejm_votings.analysis.compare_parties as compare_parties
 from mypolitics_mind.apps.sejm_votings.models import Voting
-from mypolitics_mind.apps.sejm_votings.serializers import VotingSerializer
+from mypolitics_mind.apps.sejm_votings.serializers import VotingSerializer, CompareSerializer
 import mypolitics_mind.apps.sejm_votings.scrapers.votings_scraper as votings_scraper
+
+
+def gen_id(voting: dict):
+    id_str = f'{votings_scraper.get_nr_kadnencji()}/{voting["sitting"]}/{voting["voting"]}'
+    id_byte = bytes(id_str, encoding='utf8')
+    return base64.urlsafe_b64encode(id_byte).decode()
 
 
 class VotingViewSet(viewsets.ReadOnlyModelViewSet):
@@ -54,8 +63,23 @@ class VotingViewSet(viewsets.ReadOnlyModelViewSet):
 
         return super(VotingViewSet, self).list(request, *args, **kwargs)
 
+    @action(detail=False, methods=['get'])
+    def analyze(self, request):
+        votings = self.queryset
 
-def gen_id(voting: dict):
-    id_str = f'{votings_scraper.get_nr_kadnencji()}/{voting["sitting"]}/{voting["voting"]}'
-    id_byte = bytes(id_str, encoding='utf8')
-    return base64.urlsafe_b64encode(id_byte).decode()
+        if 'party_1' in self.request.query_params.keys():
+            party_1 = self.request.query_params.get('party_1')
+            party_2 = self.request.query_params.get('party_2')
+            results = compare_parties.get_data(votings, [party_1, party_2])
+        else:
+            results = compare_parties.get_data(votings)
+
+        serializer = CompareSerializer(results, many=True)
+        data = serializer.data
+
+        response = {
+            "count": len(data),
+            "results": data
+        }
+
+        return Response(response)

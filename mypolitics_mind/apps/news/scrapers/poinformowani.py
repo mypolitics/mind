@@ -1,25 +1,14 @@
-import asyncio
 import math
-import os
 from datetime import datetime
-
-import aiohttp
+import concurrent.futures as futures
 import requests as requests
 from bs4 import BeautifulSoup
-
-if os.name == 'nt':
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
 def get_and_parse_page(url):
     response = requests.get(url)
     response.encoding = 'UTF-8'
     return BeautifulSoup(response.text, 'html.parser')
-
-
-async def get_page_async(session, url):
-    async with session.get(url) as r:
-        return await r.text()
 
 
 def parse_article(page, url):
@@ -49,6 +38,11 @@ def parse_article(page, url):
     }
 
 
+def get_article(url):
+    page = requests.get(url)
+    return parse_article(page.text, url)
+
+
 class PoinformowaniScraper:
     base_page = 'https://wiadomosci.poinformowani.pl/'
     per_page = 48
@@ -70,7 +64,7 @@ class PoinformowaniScraper:
 
         return urls[start:end]
 
-    async def parse_many_articles(self, start, end, end_slug):
+    def parse_many_articles(self, start, end, end_slug):
 
         urls = self.get_urls(start, end)
 
@@ -80,13 +74,11 @@ class PoinformowaniScraper:
                 if end_slug in url:
                     end_index = urls.index(url)
             urls = urls[:end_index]
-        articles = []
-        async with aiohttp.ClientSession() as session:
-            for url in urls:
-                page = await get_page_async(session, url)
-                articles.append(parse_article(page, url))
 
-        return articles
+        with futures.ThreadPoolExecutor() as executor:
+            articles = executor.map(get_article, urls)
+
+        return list(articles)
 
     def get_many_articles(self, start=0, end=per_page, slug=None):
-        return asyncio.run(self.parse_many_articles(start, end, slug))
+        return self.parse_many_articles(start, end, slug)

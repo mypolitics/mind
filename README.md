@@ -1,5 +1,9 @@
 # mind
 
+## Requirements
+
+- Python (3.8+)
+
 ## Installation
 
 ```bash

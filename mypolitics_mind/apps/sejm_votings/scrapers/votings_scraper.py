@@ -2,7 +2,6 @@ import json
 
 import requests
 from bs4 import BeautifulSoup
-import concurrent.futures as futures
 from datetime import datetime
 
 BASE_URL = 'https://www.sejm.gov.pl/sejm9.nsf/agent.xsp?symbol=posglos&NrKadencji=9'
@@ -108,9 +107,9 @@ def get_sittings_data(dbSitting=None, dbVoting=None):
     if dbSitting:
         sitting_and_voting = {k: v for k, v in sitting_and_voting.items() if int(k) >= dbSitting}
 
-    print(sitting_and_voting)
-    all_votings = sum(sitting_and_voting.values()) - (dbVoting or 0)
 
+    all_votings = sum(sitting_and_voting.values()) - (dbVoting or 0)
+    print(f'Do pobrania: {all_votings}')
     data = []
     for key, value in sitting_and_voting.items():
         sejmVouting = SejmVoting(key, value)

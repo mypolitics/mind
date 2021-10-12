@@ -1,8 +1,8 @@
 from moviepy.editor import VideoFileClip
 import os
 
-def cut_last_sec(path: str, sec: int):
 
+def cut_last_sec(path: str, sec: int):
     video = VideoFileClip(path)
 
     filename = f'{os.path.splitext(video.filename)[0]}#Short.mp4'
@@ -15,4 +15,3 @@ def cut_last_sec(path: str, sec: int):
     os.remove(path)
 
     return filename
-

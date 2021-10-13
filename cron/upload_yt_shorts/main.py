@@ -7,13 +7,14 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
+from cron.upload_yt_shorts.moduls.db import DB
 from moduls import download, cut_video
 from moduls.upload_video import UploadVideo
 from moduls.send_mess import SendMessage
 
 config = dotenv_values(".env")
+my_db = DB('../../db.sqlite3')
 
-VIDEOS_COUNT = 20
 BASE_VIDEO_PATH = 'https://www.youtube.com/watch?v='
 client_secret_file = "client_secrets.json"
 
@@ -51,7 +52,7 @@ youtube = build('youtube', 'v3', credentials=credentials)
 request_video_by_relevance = youtube.search().list(
     part="snippet",
     channelId=config.get('channel_id'),
-    maxResults=VIDEOS_COUNT,
+    maxResults=config.get('max_video_count'),
     order="relevance"
 )
 video_by_relevance = request_video_by_relevance.execute()
@@ -60,12 +61,20 @@ random_video = random.sample(video_by_relevance['items'], 3)
 
 send_message = SendMessage(config.get('webhook_url'))
 
+
 for video in random_video:
-    video_path = download.download_by_id(video['id']['videoId'])
+    video_id = video['id']['videoId']
+    if my_db.video_exist(video_id):
+        continue
+
+    video_path = download.download_by_id(video_id)
     edited_video_path = cut_video.cut_last_sec(video_path, 5)
 
     upload_video = UploadVideo(youtube, video, edited_video_path)
 
     response = upload_video.upload()
+    my_db.add_video(video)
 
     send_message.send_new_video_alert(response)
+
+    os.remove(edited_video_path)

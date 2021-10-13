@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'rest_framework_simplejwt',
+    'django_crontab',
     # apps
     'mypolitics_mind.apps.news',
     'mypolitics_mind.apps.sejm_members',
@@ -123,6 +124,10 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+]
+
+CRONJOBS = [
+    ('* */12 * * *', 'cron.upload_yt_shorts.main')
 ]
 
 # Internationalization

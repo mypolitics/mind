@@ -13,7 +13,7 @@ from moduls.upload_video import UploadVideo
 from moduls.send_mess import SendMessage
 
 config = dotenv_values(".env")
-my_db = DB('../../db.sqlite3')
+my_db = DB('db.sqlite3')
 
 BASE_VIDEO_PATH = 'https://www.youtube.com/watch?v='
 client_secret_file = "client_secrets.json"

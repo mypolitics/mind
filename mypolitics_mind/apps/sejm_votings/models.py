@@ -11,4 +11,5 @@ class Voting(models.Model):
     results = models.JSONField()
 
     class Meta:
+        db_table = 'votings'
         ordering = ['-sitting', '-voting']

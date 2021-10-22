@@ -26,4 +26,5 @@ class Members(models.Model):
         return self.name
 
     class Meta:
+        db_table = 'members'
         verbose_name_plural = 'Members'

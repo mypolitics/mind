@@ -2,7 +2,6 @@ import json
 from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
-import concurrent.futures as futures
 
 MEMBERS_PAGE_URL = 'https://www.sejm.gov.pl/Sejm9.nsf/poslowie.xsp?type=A'
 MEMBERS_PAGE = requests.get(MEMBERS_PAGE_URL)
@@ -79,10 +78,9 @@ def parse_page(url):
 def get_all_members():
     urls = get_members_urls(MEMBERS_PAGE)
 
-    with futures.ThreadPoolExecutor() as executor:
-        result = executor.map(parse_page, urls)
+    result = [parse_page(url) for url in urls]
 
-    return list(result)
+    return result
 
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from mypolitics_mind.apps.news.models import News
+from apps.news.models import News
 
 
 @admin.register(News)

@@ -3,9 +3,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from rest_framework import viewsets
 
-from mypolitics_mind.apps.news.models import News
-from mypolitics_mind.apps.news.scrapers.poinformowani import PoinformowaniScraper
-from mypolitics_mind.apps.news.serializers import NewsSerializer
+from apps.news.models import News
+from apps.news.scrapers.poinformowani import PoinformowaniScraper
+from apps.news.serializers import NewsSerializer
 
 
 class NewsPoinformowaniViewSet(viewsets.ReadOnlyModelViewSet):

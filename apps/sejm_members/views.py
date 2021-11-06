@@ -8,9 +8,9 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
-import mypolitics_mind.apps.sejm_members.scrapers.members_scraper as members_scraper
-from mypolitics_mind.apps.sejm_members.models import Members
-from mypolitics_mind.apps.sejm_members.serializers import MemberSerializer
+import apps.sejm_members.scrapers.members_scraper as members_scraper
+from apps.sejm_members.models import Members
+from apps.sejm_members.serializers import MemberSerializer
 
 
 class MembersViewSet(viewsets.ReadOnlyModelViewSet):

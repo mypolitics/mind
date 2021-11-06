@@ -1,6 +1,6 @@
 from rest_framework import routers
 
-from mypolitics_mind.apps.sejm_members.views import MembersViewSet
+from apps.sejm_members.views import MembersViewSet
 
 members_router = routers.DefaultRouter()
 

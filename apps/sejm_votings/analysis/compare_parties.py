@@ -1,5 +1,5 @@
 import itertools
-from mypolitics_mind.apps.sejm_votings.models import Voting
+from apps.sejm_votings.models import Voting
 
 
 def get_voting_ratio(voting: Voting, party):

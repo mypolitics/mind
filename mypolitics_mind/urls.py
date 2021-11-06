@@ -23,7 +23,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
-from mypolitics_mind.apps.router import router
+from apps.router import router
 
 urlpatterns = [
     path('', RedirectView.as_view(url='admin')),

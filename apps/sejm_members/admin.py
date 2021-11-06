@@ -3,8 +3,8 @@ from django.contrib import messages
 # Register your models here.
 from django.utils.translation import ngettext
 
-from mypolitics_mind.apps.sejm_members.models import Members
-from mypolitics_mind.apps.sejm_members.views import MembersViewSet
+from apps.sejm_members.models import Members
+from apps.sejm_members.views import MembersViewSet
 
 
 @admin.action(description='update members')

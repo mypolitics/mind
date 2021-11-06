@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from mypolitics_mind.apps.sejm_votings.models import Voting
+from apps.sejm_votings.models import Voting
 
 
 @admin.register(Voting)

@@ -6,10 +6,10 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-import mypolitics_mind.apps.sejm_votings.analysis.compare_parties as compare_parties
-from mypolitics_mind.apps.sejm_votings.models import Voting
-from mypolitics_mind.apps.sejm_votings.serializers import VotingSerializer, CompareSerializer
-import mypolitics_mind.apps.sejm_votings.scrapers.votings_scraper as votings_scraper
+import apps.sejm_votings.analysis.compare_parties as compare_parties
+from apps.sejm_votings.models import Voting
+from apps.sejm_votings.serializers import VotingSerializer, CompareSerializer
+import apps.sejm_votings.scrapers.votings_scraper as votings_scraper
 
 
 def gen_id(voting: dict):

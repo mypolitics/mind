@@ -1,6 +1,6 @@
 from rest_framework import routers
 
-from mypolitics_mind.apps.sejm_votings.views import VotingViewSet
+from apps.sejm_votings.views import VotingViewSet
 
 votings_router = routers.DefaultRouter()
 

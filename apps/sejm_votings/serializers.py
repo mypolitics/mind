@@ -1,8 +1,6 @@
-from abc import ABC
-
-from mypolitics_mind.apps.sejm_votings.models import Voting
+from apps.sejm_votings.models import Voting
 from rest_framework import serializers
-from mypolitics_mind.common.serializers import DynamicFieldsModelSerializer
+from common.serializers import DynamicFieldsModelSerializer
 
 
 class VotingSerializer(DynamicFieldsModelSerializer):

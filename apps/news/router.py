@@ -1,6 +1,6 @@
 from rest_framework import routers
 
-from mypolitics_mind.apps.news.views import NewsPoinformowaniViewSet
+from apps.news.views import NewsPoinformowaniViewSet
 
 news_router = routers.DefaultRouter()
 

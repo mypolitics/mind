@@ -31,9 +31,9 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'django_crontab',
     # apps
-    'mypolitics_mind.apps.news',
-    'mypolitics_mind.apps.sejm_members',
-    'mypolitics_mind.apps.sejm_votings'
+    'apps.news',
+    'apps.sejm_members',
+    'apps.sejm_votings',
 ]
 
 REST_FRAMEWORK = {
